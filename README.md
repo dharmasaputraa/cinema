@@ -423,10 +423,3 @@ make logs
 docker compose logs -f postgres
 docker compose logs -f redis
 ```
-
-### Common Issues
-
-1. Port already in use: Change `APP_PORT` in `.env`
-2. Database connection failed: Check PostgreSQL is running and credentials are correct
-3. Redis connection failed: Check Redis is running and credentials are correct
-4. Migration failed: Check database permissions and connection string
