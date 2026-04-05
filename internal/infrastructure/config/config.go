@@ -18,6 +18,7 @@ type Config struct {
 type AppConfig struct {
 	Env         string
 	Port        string
+	AutoMigrate bool
 	CORSOrigins []string
 }
 
@@ -62,6 +63,7 @@ func Load() (*Config, error) {
 		App: AppConfig{
 			Env:         viper.GetString("APP_ENV"),
 			Port:        viper.GetString("APP_PORT"),
+			AutoMigrate: viper.GetBool("AUTO_MIGRATE"),
 			CORSOrigins: parseCSV(viper.GetString("CORS_ORIGINS")),
 		},
 		DB: DBConfig{

@@ -25,26 +25,30 @@ import (
 
 func main() {
 	// ======================
-	// LOGGER
+	// TEMP LOGGER
 	// ======================
-	var log *zap.Logger
-	log, _ = zap.NewProduction()
+	tmpLog, _ := zap.NewProduction()
 
 	// ======================
 	// CONFIG
 	// ======================
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal("invalid configuration", zap.Error(err))
+		tmpLog.Fatal("invalid configuration", zap.Error(err))
 	}
 
-	if cfg.App.Env == "production" {
-		log, _ = zap.NewProduction()
-		gin.SetMode(gin.ReleaseMode)
-	} else {
-		log, _ = zap.NewDevelopment()
-	}
-	defer log.Sync()
+	// ======================
+	// REAL LOGGER
+	// ======================
+	log := initLogger(cfg)
+
+	zap.ReplaceGlobals(log)
+
+	defer func() {
+		if err := log.Sync(); err != nil {
+			fmt.Println("failed to sync logger:", err)
+		}
+	}()
 
 	log.Info("config loaded", zap.String("env", cfg.App.Env))
 
@@ -60,10 +64,24 @@ func main() {
 	// MIGRATION
 	// ======================
 	dsn := fmt.Sprintf("%s:%s@%s:%s/%s?sslmode=%s",
-		cfg.DB.User, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Name, cfg.DB.SSLMode)
+		cfg.DB.User,
+		cfg.DB.Password,
+		cfg.DB.Host,
+		cfg.DB.Port,
+		cfg.DB.Name,
+		cfg.DB.SSLMode,
+	)
 
-	if err := db.RunMigrations(dsn, log); err != nil {
-		log.Fatal("migration failed", zap.Error(err))
+	if cfg.App.AutoMigrate {
+		log.Info("running migrations...")
+
+		if err := db.RunMigrations(dsn, log); err != nil {
+			log.Fatal("migration failed", zap.Error(err))
+		}
+
+		log.Info("migration completed")
+	} else {
+		log.Info("auto migration disabled")
 	}
 
 	// ======================
@@ -81,6 +99,7 @@ func main() {
 
 	// Middleware stack (ORDER PENTING)
 	r.Use(
+		middleware.RequestID(),
 		middleware.CORS(cfg.App.CORSOrigins),
 		middleware.Logger(log),
 		middleware.ErrorHandler(log),
@@ -121,8 +140,10 @@ func main() {
 	// SERVER
 	// ======================
 	srv := &http.Server{
-		Addr:    ":" + cfg.App.Port,
-		Handler: r,
+		Addr:         ":" + cfg.App.Port,
+		Handler:      r,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	go func() {
@@ -150,4 +171,22 @@ func main() {
 	}
 
 	log.Info("server exited properly")
+}
+
+func initLogger(cfg *config.Config) *zap.Logger {
+	if cfg.App.Env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+
+		log, err := zap.NewProduction()
+		if err != nil {
+			panic(err)
+		}
+		return log
+	}
+
+	log, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+	return log
 }
