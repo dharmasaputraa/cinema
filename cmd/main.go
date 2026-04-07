@@ -12,6 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
+	_ "github.com/dharmasaputraa/cinema-api/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/dharmasaputraa/cinema-api/internal/infrastructure/cache"
 	"github.com/dharmasaputraa/cinema-api/internal/infrastructure/config"
 	"github.com/dharmasaputraa/cinema-api/internal/infrastructure/db"
@@ -23,6 +27,20 @@ import (
 	"github.com/dharmasaputraa/cinema-api/pkg/middleware"
 )
 
+// @title Cinema API
+// @version 1.0
+// @description This is the API documentation for the Cinema management system.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api/v1
 func main() {
 	// ======================
 	// TEMP LOGGER
@@ -105,6 +123,11 @@ func main() {
 		middleware.Logger(log),
 		middleware.ErrorHandler(log),
 	)
+
+	// ======================
+	// SWAGGER ROUTE
+	// ======================
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// ======================
 	// HEALTH CHECK

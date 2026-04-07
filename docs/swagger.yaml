@@ -1,0 +1,235 @@
+basePath: /api/v1
+definitions:
+  github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Cinema:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: string
+      isActive:
+        type: boolean
+      name:
+        type: string
+      phone:
+        type: string
+      screens:
+        items:
+          $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Screen'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Screen:
+    properties:
+      capacity:
+        type: integer
+      cinema:
+        $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Cinema'
+      cinemaID:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      hasDolby:
+        type: boolean
+      hasIMAX:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      screenType:
+        $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_domain.ScreenType'
+      seats:
+        items:
+          $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Seat'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  github_com_dharmasaputraa_cinema-api_internal_cinema_domain.ScreenType:
+    enum:
+    - regular
+    - vip
+    - imax
+    type: string
+    x-enum-varnames:
+    - ScreenTypeRegular
+    - ScreenTypeVIP
+    - ScreenTypeIMAX
+  github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Seat:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      isActive:
+        type: boolean
+      number:
+        type: integer
+      row:
+        type: string
+      screen:
+        $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Screen'
+      screenID:
+        type: string
+      seatType:
+        $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_domain.SeatType'
+      updatedAt:
+        type: string
+    type: object
+  github_com_dharmasaputraa_cinema-api_internal_cinema_domain.SeatType:
+    enum:
+    - regular
+    - premium
+    - vip
+    type: string
+    x-enum-varnames:
+    - SeatTypeRegular
+    - SeatTypePremium
+    - SeatTypeVIP
+  github_com_dharmasaputraa_cinema-api_internal_cinema_usecase.CreateCinemaInput:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      email:
+        type: string
+      name:
+        maxLength: 255
+        minLength: 2
+        type: string
+      phone:
+        type: string
+    required:
+    - address
+    - city
+    - name
+    type: object
+  github_com_dharmasaputraa_cinema-api_pkg_response.ErrorDetail:
+    properties:
+      code:
+        type: string
+      field:
+        type: string
+      message:
+        type: string
+      type:
+        type: string
+    type: object
+  github_com_dharmasaputraa_cinema-api_pkg_response.ErrorResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_pkg_response.ErrorDetail'
+        type: array
+    type: object
+  github_com_dharmasaputraa_cinema-api_pkg_response.Meta:
+    properties:
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  github_com_dharmasaputraa_cinema-api_pkg_response.SuccessResponse:
+    properties:
+      data: {}
+      meta:
+        $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_pkg_response.Meta'
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the API documentation for the Cinema management system.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Cinema API
+  version: "1.0"
+paths:
+  /cinemas:
+    get:
+      consumes:
+      - application/json
+      description: Displays a list of cinemas with pagination and search features
+        by city.
+      parameters:
+      - description: Filter by city
+        in: query
+        name: city
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Amount of data per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_pkg_response.SuccessResponse'
+      summary: Get Cinema list
+      tags:
+      - cinemas
+    post:
+      consumes:
+      - application/json
+      description: Saving new cinema data to database
+      parameters:
+      - description: Data Cinema
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_usecase.CreateCinemaInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_internal_cinema_domain.Cinema'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_pkg_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_dharmasaputraa_cinema-api_pkg_response.ErrorResponse'
+      tags:
+      - cinemas
+swagger: "2.0"

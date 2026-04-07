@@ -39,3 +39,7 @@ logs:
 
 ps:
 	docker compose ps
+
+swagger:
+	@echo "Generating Swagger docs..."
+	swag init -g cmd/main.go --parseDependency --parseInternal

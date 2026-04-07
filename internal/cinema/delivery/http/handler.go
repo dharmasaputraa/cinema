@@ -1,6 +1,7 @@
 package http
 
 import (
+	_ "github.com/dharmasaputraa/cinema-api/internal/cinema/domain"
 	"github.com/dharmasaputraa/cinema-api/internal/cinema/usecase"
 	appErrors "github.com/dharmasaputraa/cinema-api/pkg/errors"
 	"github.com/dharmasaputraa/cinema-api/pkg/helper"
@@ -18,6 +19,15 @@ func NewCinemaHandler(uc usecase.CinemaUsecase) *CinemaHandler {
 	return &CinemaHandler{uc}
 }
 
+// @Description Saving new cinema data to database
+// @Tags cinemas
+// @Accept json
+// @Produce json
+// @Param request body usecase.CreateCinemaInput true "Data Cinema"
+// @Success 201 {object} domain.Cinema
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Router /cinemas [post]
 func (h *CinemaHandler) Create(c *gin.Context) {
 	var input usecase.CreateCinemaInput
 
@@ -50,6 +60,17 @@ func (h *CinemaHandler) GetByID(c *gin.Context) {
 	response.OK(c, cinema)
 }
 
+// List godoc
+// @Summary Get Cinema list
+// @Description Displays a list of cinemas with pagination and search features by city.
+// @Tags cinemas
+// @Accept json
+// @Produce json
+// @Param city query string false "Filter by city"
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Amount of data per page" default(10)
+// @Success 200 {object} response.SuccessResponse
+// @Router /cinemas [get]
 func (h *CinemaHandler) List(c *gin.Context) {
 	p := pagination.Parse(c)
 	city := c.Query("city")
