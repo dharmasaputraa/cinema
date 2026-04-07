@@ -63,7 +63,8 @@ func main() {
 	// ======================
 	// MIGRATION
 	// ======================
-	dsn := fmt.Sprintf("%s:%s@%s:%s/%s?sslmode=%s",
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.DB.User,
 		cfg.DB.Password,
 		cfg.DB.Host,

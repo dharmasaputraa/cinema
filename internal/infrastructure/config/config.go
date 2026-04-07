@@ -50,7 +50,7 @@ func Load() (*Config, error) {
 	if env == "production" {
 		viper.SetConfigFile(".env.prod")
 	} else {
-		viper.SetConfigFile(".env.dev")
+		viper.SetConfigFile(".env")
 	}
 
 	viper.AutomaticEnv()
